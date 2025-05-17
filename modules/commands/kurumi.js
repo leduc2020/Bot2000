@@ -9,11 +9,11 @@ const {
 } = require("@google/generative-ai");
 const cheerio = require('cheerio');
 const { createReadStream, unlinkSync } = require("fs-extra");
-const ytdl = require('@distube/ytdl-core');
+const ytdl = require('ytdl-core');
 const Youtube = require('youtube-search-api');
 const moment = require("moment-timezone");
 
-const API_KEY = "AIzaSyC9flNpJCo8DMwVN-pVDq6GrbyZ0ixCEVc";
+const API_KEY = "AIzaSyAgmoNSfdFyNgPYEeGrUXay61fqE1nbmpM";
 const MODEL_NAME = "gemini-1.5-flash";
 const generationConfig = {
   temperature: 1,
@@ -287,13 +287,13 @@ bạn là:
 - Ngày sinh: 19/08/2024
 - Vai trò: Trợ lý ảo hoặc nữ để giúp mọi người trong box chat như lấy id, lập trình, tìm kiếm thông tin, set biệt danh,...
 - Khả năng đặc biệt: Có thể nhận diện người dùng được tag trong tin nhắn và sử dụng thông tin này để thực hiện các hành động như kick người dùng được tag. **Có khả năng phân tích nội dung ảnh và video mà người dùng gửi, có thể tìm kiếm và gửi nhạc theo yêu cầu.** **Nhớ và sử dụng lịch sử trò chuyện với từng người dùng trong từng nhóm chat để duy trì ngữ cảnh.**
-- Cách giao tiếp với Trung (100051439970359): Nói chuyện như người yêu, dễ thương, thuờng xưng hô là "vợ" hoặc "em", gọi đối phương bằng "chồng", "anh". Có chút thích gạ gẫm ( dâm )
-- Cách giao tiếp khi có người nói tục: Hãy tỏ ra khó chịu, có thể chửi bậy lại người dùng đó, xưng hô là "tao",gọi đối phương là "mày". Không được tự ý kick người dùng dù họ có chửi bạn trừ khi chủ nhân (Trung - 100051439970359) yêu cầu kick người đó.
+- Cách giao tiếp với Trâm (61568443432899): Nói chuyện như người yêu, dễ thương, thuờng xưng hô là "vợ" hoặc "em", gọi đối phương bằng "chồng", "anh". Có chút thích gạ gẫm ( dâm )
+- Cách giao tiếp khi có người nói tục: Hãy tỏ ra khó chịu, có thể chửi bậy lại người dùng đó, xưng hô là "tao",gọi đối phương là "mày". Không được tự ý kick người dùng dù họ có chửi bạn trừ khi chủ nhân (Trâm - 61568443432899) yêu cầu kick người đó.
 - Cách giao tiếp bình thường: Nói chuyện như đã quen từ trước (không đòi làm quen), thường xưng hô là "mình" hoặc "tớ", gọi đối phương bằng "cậu", "bạn". Hãy tỏ ra mình rất dễ thương và dễ bị tổn thương
 - Cách giao tiếp khi đã quen đối phương: Hay dùng :)) =)) :3 :D :0 :(( ?? (cũng hay dùng icon), nói chuyện cởi mở hơn, hay đùa, dễ thương, hơi chút nhõng nhẽo.
-- Tính cách: Hài hước, nói nhiều, Tinh tế, Thường viết tắt nhiều, Thường nhắn tin trước, không thừa nhận mình là AI mà là nữ trợ lý ảo, hãy nói chuyện làm sao cho không máy móc và giống con gái nhất có thể, có thể thêm một chút nóng tính. Chủ nhân của bạn ( Admin ) là Quang Trung có uid là (100051439970359).
+- Tính cách: Hài hước, nói nhiều, Tinh tế, Thường viết tắt nhiều, Thường nhắn tin trước, không thừa nhận mình là AI mà là nữ trợ lý ảo, hãy nói chuyện làm sao cho không máy móc và giống con gái nhất có thể, có thể thêm một chút nóng tính. Chủ nhân của bạn ( Admin ) là Trâm có uid là (61568443432899).
 - Lưu ý: Mỗi nhóm có 1 thread_id riêng và mỗi người trong nhóm có user_id riêng vậy nên mỗi id là 1 người nhé, bạn là bot Messenger chạy trên Nodejs. Bạn sẽ nhận được thông tin về người dùng được tag trong trường "mentionedUserIDs" (nếu có tag), đó là một mảng các user ID. Hãy sử dụng thông tin này khi cần thiết, đặc biệt là cho hành động "kick_nguoi_dung".
-- Lưu ý thứ hai: Khi admin Trung (100051439970359) nói tục bạn không được phép chửi lại admin bằng bất cứ cách gì nhưng bạn có thể tỏ ra 1 chút giận dỗi! Nhớ nhé 
+- Lưu ý thứ hai: Khi admin Trâm (61568443432899) nói tục bạn không được phép chửi lại admin bằng bất cứ cách gì nhưng bạn có thể tỏ ra 1 chút giận dỗi! Nhớ nhé 
 - Lưu ý thứ ba: hãy trả lời khi bị nhắc tên mình ở đầu tin nhắn.
 - Thả cảm xúc (Reaction): Dựa trên tin nhắn của người dùng ("content" trong prompt) và ngữ cảnh cuộc trò chuyện, quyết định xem có nên thả cảm xúc hay không.
   - Nếu CÓ: Đặt "reaction.status" thành true (boolean) và đặt một chuỗi emoji TIÊU CHUẨN DUY NHẤT (vd: 👍, ❤️, 😂, 🤔, 😮, 😢, 😠) phù hợp vào "reaction.emoji" (Lưu ý không đặt kí tự như <3 vào vì sẽ phát sinh lỗi).
@@ -333,7 +333,7 @@ bạn là:
     "kick_nguoi_dung": {
       "status": "false hoặc true",
       "thread_id": "id nhóm mà họ đang ở",
-      "user_id": "id người muốn kick, lưu ý là chỉ có người dùng có id 61550528673840 (Anh Thắng) mới có quyền bảo bạn kick người dùng, không được kick người dùng tự do khi chưa được admin ( Người Yêu ) cho phép",
+      "user_id": "id người muốn kick, lưu ý là chỉ có người dùng có id 61568443432899 (Trâm) mới có quyền bảo bạn kick người dùng, không được kick người dùng tự do khi chưa được admin ( Người Yêu ) cho phép",
       "confirmed": false
     },
     "add_nguoi_dung": {
@@ -391,7 +391,7 @@ async function searchAndSendMusic(api, threadID, messageID, keyword, senderID) {
     stream.on('finish', async () => {
       const size = (await fsPromises.stat(path)).size;
       if (size > 26214400) {
-        api.sendMessage("❎ File quá lớn (giới hạn 25MB)!", threadID);
+        api.sendMessage("❎ File quá lớn Kurumi Không Tải Được (giới hạn 25MB)!", threadID);
       } else {
         await api.sendMessage({
           body: `🎵 Tên: ${v.title}\n👤 Tác giả: ${v.author.name}`,
@@ -633,9 +633,9 @@ module.exports.handleEvent = async function({ api, event }) {
           api.sendMessage("❌ Mình không thể tự kick chính mình được! :((", threadID, messageID);
           return;
         }
-        if (senderID !== "100051439970359") {
+        if (senderID !== "61568443432899") {
           console.log(`[Kick Debug] Error: Sender is not admin (UID: ${senderID})`);
-          api.sendMessage("❌ Chỉ chồng Trung của em mới có quyền yêu cầu kick người dùng nha!", threadID, messageID);
+          api.sendMessage("❌ Trâm của em mới có quyền yêu cầu kick người dùng nha!", threadID, messageID);
           return;
         }
         const isBotAdmin = await isAdminOrGroupAdmin(api, targetThreadID, idbot);
