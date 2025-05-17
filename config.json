@@ -3,7 +3,7 @@
     "notiUnsend": 10,
     "iconUnsend": {
         "status": true,
-        "icon": "😡"
+        "icon": "♥️"
     },
     "NOTIFICATION": true,
     "language": "vi",
@@ -23,21 +23,21 @@
     "PASSWORD": "",
     "OTPKEY": "",
     "TDS_TOKEN": "",
-    "BOTNAME": "#",
-    "FACEBOOK_ADMIN": "",
-    "PREFIX": "#",
+    "BOTNAME": "Yuz",
+    "FACEBOOK_ADMIN": "https://www.facebook.com/SpeedTunnel/",
+    "PREFIX": ".",
     "ADMINBOT": [
         "",
         "",
         "",
         "",
         "",
-        "100051439970359"
+        "61568443432899"
     ],
     "NDH": [
         "",
         "",
-        "100051439970359"
+        "61568443432899"
     ],
     "DATABASE": {
         "sqlite": {
