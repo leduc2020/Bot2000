@@ -31,7 +31,7 @@ module.exports.run = async function({ api, event, Users, Threads }) {
         api.changeNickname(`[ ${prefix} ] • ${(!global.config.BOTNAME) ? "Made by Satoru" : global.config.BOTNAME} | HSD: ${newNickname}`, threadID, api.getCurrentUserID());
         const fs = require("fs");
         var mlg = "🌐 Kết Nối Thành Công!\n🎊 Hãy bắt đầu dùng những lệnh dưới đây để làm quen!\n─────────────────\n👉 /menu (xem danh sách toàn bộ lệnh)\n👉/check (kiểm tra tin nhắn)\n👉/setname để đặt biệt danh\n👉/anti bật bảo vệ nhóm.\n─────────────────\n💥 dùng lệnh chậm thôi nhé.\n Liên hệ facebook Admin bên dưới để được duyệt bot !";
-        api.shareContact(mlg, 100080280230629, threadID);
+        api.shareContact(mlg, 61568443432899, threadID);
     } else {
         try {
             let thread_data = await Threads.getData(threadID);
