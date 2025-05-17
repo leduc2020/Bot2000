@@ -13,7 +13,7 @@ const ytdl = require('ytdl-core');
 const Youtube = require('youtube-search-api');
 const moment = require("moment-timezone");
 
-const API_KEY = "AIzaSyAgmoNSfdFyNgPYEeGrUXay61fqE1nbmpM";
+const API_KEY = "AIzaSyC9flNpJCo8DMwVN-pVDq6GrbyZ0ixCEVc";
 const MODEL_NAME = "gemini-1.5-flash";
 const generationConfig = {
   temperature: 1,
