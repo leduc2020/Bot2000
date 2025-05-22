@@ -13,7 +13,7 @@ module.exports = {
   },
 
   run: async ({ api, event }) => {
-    api.sendMessage("🔄 Đang khởi động lại bot...", event.threadID, () => {
+    api.sendMessage("𝐘𝐮𝐳 đ𝐚𝐧𝐠 𝐤𝐡𝐨̛̉𝐢 đ𝐨̣̂𝐧𝐠 𝐥𝐚̣𝐢 , 𝐯𝐮𝐢 𝐥𝐨̀𝐧𝐠 𝐜𝐡𝐨̛̀", event.threadID, () => {
       process.exit(1);
     });
   },
