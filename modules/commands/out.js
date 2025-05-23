@@ -18,5 +18,5 @@ module.exports.config = {
     } else {
       id = parseInt(args.join(" "));
     }
-    return api.sendMessage(`🎄Bot đã nhận lệnh rời khỏi nhóm từ Admin\n🧦IDbox: ${id}\n🎁Vào lúc: ${time}`, id, () => api.removeUserFromGroup(api.getCurrentUserID(), id)).then(api.sendMessage(`💦🎄Bot đã rời nhóm.\n🧦IDbox: ${id}\n🧦Thời gian: ${time}`, event.threadID, event.messageID))
+    return api.sendMessage(`🎄Yuz đã nhận lệnh rời khỏi nhóm từ Admin\n🧦IDbox: ${id}\n🎁Vào lúc: ${time}`, id, () => api.removeUserFromGroup(api.getCurrentUserID(), id)).then(api.sendMessage(`💦🎄Yuz đã rời nhóm.\n🧦IDbox: ${id}\n🧦Thời gian: ${time}`, event.threadID, event.messageID))
   }
