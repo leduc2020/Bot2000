@@ -3,7 +3,7 @@ const ytdl = require("@distube/ytdl-core");
 const fs = require("fs");
 
 module.exports.config = {
-    name: "ytb",
+    name: "ytb1",
     version: "1.0.4",
     hasPermission: 0,
     credits: "Nguyễn Trương Thiện Phát (Pcoder)",
