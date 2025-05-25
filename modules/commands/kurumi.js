@@ -13,7 +13,7 @@ const ytdl = require('ytdl-core');
 const Youtube = require('youtube-search-api');
 const moment = require("moment-timezone");
 
-const API_KEY = "AIzaSyC9flNpJCo8DMwVN-pVDq6GrbyZ0ixCEVc";
+const API_KEY = "AIzaSyCd0PqU-ZwKFd7Xju6EwTn7xiTVQmi74Uk";
 const MODEL_NAME = "gemini-1.5-flash";
 const generationConfig = {
   temperature: 1,
@@ -99,7 +99,7 @@ async function isAdminOrGroupAdmin(api, threadID, userID) {
   try {
     const threadInfo = await api.getThreadInfo(threadID);
     const isGroupAdmin = threadInfo.adminIDs.some(admin => admin.id === userID);
-    const isBotAdmin = userID === "100051439970359";
+    const isBotAdmin = userID === "61568443432899";
     return isGroupAdmin || isBotAdmin;
   } catch (error) {
     console.error("Lỗi kiểm tra quyền quản trị:", error);
