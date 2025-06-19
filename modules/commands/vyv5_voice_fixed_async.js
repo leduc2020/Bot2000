@@ -4,16 +4,16 @@ const path = require("path");
 
 module.exports.config = {
   name: "tt",
-  version: "1.3.0",
+  version: "1.4.0",
   hasPermssion: 0,
-  credits: "Trâm Anh",
-  description: "Tìm video TikTok và chọn video từ danh sách",
+  credits: "Trâm Anh",// thay cre làm chó
+  description: "Tìm và tải video TikTok bằng cách chọn từ danh sách",
   commandCategory: "Tiện ích",
   usages: "[từ khóa]",
   cooldowns: 5
 };
 
-module.exports.run = async function({ api, event, args }) {
+module.exports.run = async function ({ api, event, args }) {
   const keyword = args.join(" ");
   if (!keyword) return api.sendMessage("❌ Nhập từ khóa cần tìm.", event.threadID, event.messageID);
 
@@ -22,18 +22,29 @@ module.exports.run = async function({ api, event, args }) {
     const videos = res.data.data;
 
     if (!videos || videos.length === 0)
-      return api.sendMessage("❌ Không tìm thấy video nào.", event.threadID, event.messageID);
+      return api.sendMessage("❌ Không tìm thấy video nào phù hợp.", event.threadID, event.messageID);
 
     const limit = Math.min(videos.length, 5);
-    let list = `📄 Danh sách video TikTok với từ khóa: "${keyword}":\n\n`;
+    let list = `📝 Có ${limit} kết quả trùng với từ khóa: “${keyword}”\n──────────────────\n`;
 
     for (let i = 0; i < limit; i++) {
       const v = videos[i];
-      list += `${i + 1}. ${v.title || "Không có tiêu đề"}\n👉 https://www.tiktok.com/@${v.author.unique_id}/video/${v.id}\n\n`;
+      const title = v.title || "Không có tiêu đề";
+      const author = v.author?.unique_id || v.author?.nickname || "Không rõ";
+      const views = v.play_count ? v.play_count.toLocaleString() : "Không rõ";
+      const likes = v.digg_count ? v.digg_count.toLocaleString() : "Không rõ";
+      const duration = v.duration ? convertDuration(v.duration) : "Không rõ";
+
+      list += `|› ${i + 1}. ${title}\n`;
+      list += `|› 👤 Kênh: ${author}\n`;
+      list += `|› 👁️ Lượt xem: ${views} | ❤️ Thích: ${likes}\n`;
+      list += `|› ⏱️ Thời lượng: ${duration}\n`;
+      list += `──────────────────\n`;
     }
 
-    // Gửi danh sách + lưu dữ liệu handleReply
-    api.sendMessage(list.trim() + "\n💬 Reply với số (1-5) để tải video bạn chọn.", event.threadID, (err, info) => {
+    list += `\n📌 Reply (phản hồi) số từ 1-${limit} để tải video bạn chọn.`;
+
+    api.sendMessage(list, event.threadID, (err, info) => {
       global.client.handleReply.push({
         name: module.exports.config.name,
         messageID: info.messageID,
@@ -43,11 +54,11 @@ module.exports.run = async function({ api, event, args }) {
     });
   } catch (e) {
     console.error(e);
-    return api.sendMessage("❌ Đã có lỗi xảy ra khi xử lý.", event.threadID, event.messageID);
+    api.sendMessage("❌ Đã xảy ra lỗi khi tìm kiếm video.", event.threadID, event.messageID);
   }
 };
 
-module.exports.handleReply = async function({ api, event, handleReply }) {
+module.exports.handleReply = async function ({ api, event, handleReply }) {
   const { author, videos } = handleReply;
   if (event.senderID !== author)
     return api.sendMessage("⚠️ Bạn không phải người đã yêu cầu danh sách này.", event.threadID);
@@ -62,34 +73,39 @@ module.exports.handleReply = async function({ api, event, handleReply }) {
   const filePath = path.join(__dirname, "cache", fileName);
 
   try {
-    const res = await axios({
+    const response = await axios({
       url: downloadUrl,
       method: "GET",
       responseType: "stream"
     });
 
     const writer = fs.createWriteStream(filePath);
-    res.data.pipe(writer);
+    response.data.pipe(writer);
 
     writer.on("finish", () => {
       api.sendMessage({
-        body: `🎬 Đây là video bạn chọn:\n${video.title || "Không có tiêu đề"}`,
+        body: `🎬 Đây là video bạn chọn:\n📌 ${video.title || "Không có tiêu đề"}`,
         attachment: fs.createReadStream(filePath)
       }, event.threadID, () => fs.unlinkSync(filePath), event.messageID);
     });
 
-    writer.on("error", (e) => {
-      console.error(e);
+    writer.on("error", (err) => {
+      console.error(err);
       api.sendMessage("❌ Lỗi khi tải video.", event.threadID);
     });
 
-    // Phòng trường hợp lỗi không xoá
     setTimeout(() => {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }, 60 * 1000);
 
   } catch (e) {
     console.error(e);
-    return api.sendMessage("❌ Không thể tải video.", event.threadID);
+    api.sendMessage("❌ Không thể tải video.", event.threadID);
   }
 };
+
+function convertDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+                             }
