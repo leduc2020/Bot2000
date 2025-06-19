@@ -3,109 +3,119 @@ const fs = require("fs-extra");
 const path = require("path");
 
 module.exports.config = {
-  name: "tt",
-  version: "1.4.0",
+  name: "tiktok",
+  version: "1.5.0",
   hasPermssion: 0,
-  credits: "Trâm Anh",// thay cre làm chó
-  description: "Tìm và tải video TikTok bằng cách chọn từ danh sách",
+  credits: "ChatGPT",
+  description: "Tìm kiếm và tải video TikTok",
   commandCategory: "Tiện ích",
-  usages: "[từ khóa]",
+  usages: "tiktok <từ khóa>",
   cooldowns: 5
 };
 
-module.exports.run = async function ({ api, event, args }) {
+module.exports.run = async ({ api, event, args }) => {
   const keyword = args.join(" ");
-  if (!keyword) return api.sendMessage("❌ Nhập từ khóa cần tìm.", event.threadID, event.messageID);
+  const { threadID, messageID, senderID } = event;
+
+  if (!keyword) return api.sendMessage("🔎 Nhập từ khóa để tìm video TikTok!", threadID, messageID);
 
   try {
     const res = await axios.get(`https://www.tikwm.com/api/feed/search?keywords=${encodeURIComponent(keyword)}`);
-    const videos = res.data.data;
+    const videos = res.data.data?.slice(0, 5);
 
-    if (!videos || videos.length === 0)
-      return api.sendMessage("❌ Không tìm thấy video nào phù hợp.", event.threadID, event.messageID);
+    if (!videos?.length) return api.sendMessage("❌ Không tìm thấy video nào.", threadID, messageID);
 
-    const limit = Math.min(videos.length, 5);
-    let list = `📝 Có ${limit} kết quả trùng với từ khóa: “${keyword}”\n──────────────────\n`;
+    let msg = `📝 Có ${videos.length} kết quả trùng với từ khóa “${keyword}”:\n──────────────────\n`;
+    const attachments = [];
 
-    for (let i = 0; i < limit; i++) {
+    for (let i = 0; i < videos.length; i++) {
       const v = videos[i];
-      const title = v.title || "Không có tiêu đề";
-      const author = v.author?.unique_id || v.author?.nickname || "Không rõ";
-      const views = v.play_count ? v.play_count.toLocaleString() : "Không rõ";
-      const likes = v.digg_count ? v.digg_count.toLocaleString() : "Không rõ";
-      const duration = v.duration ? convertDuration(v.duration) : "Không rõ";
+      msg += `|› ${i + 1}. ${v.title || "Không có tiêu đề"}\n`;
+      msg += `|› 👤 Kênh: ${v.author?.unique_id || "Không rõ"}\n`;
+      msg += `|› 👁️ ${v.play_count?.toLocaleString() || "?"} | ❤️ ${v.digg_count?.toLocaleString() || "?"}\n`;
+      msg += `|› ⏱️ ${formatDuration(v.duration)}\n`;
+      msg += `──────────────────\n`;
 
-      list += `|› ${i + 1}. ${title}\n`;
-      list += `|› 👤 Kênh: ${author}\n`;
-      list += `|› 👁️ Lượt xem: ${views} | ❤️ Thích: ${likes}\n`;
-      list += `|› ⏱️ Thời lượng: ${duration}\n`;
-      list += `──────────────────\n`;
+      // Lấy ảnh thumbnail
+      const thumbStream = await axios.get(v.cover, { responseType: "stream" }).then(res => res.data);
+      attachments.push(thumbStream);
     }
 
-    list += `\n📌 Reply (phản hồi) số từ 1-${limit} để tải video bạn chọn.`;
+    msg += `\n📌 Reply (phản hồi) số từ 1-${videos.length} để tải video.`
 
-    api.sendMessage(list, event.threadID, (err, info) => {
+    api.sendMessage({
+      body: msg.trim(),
+      attachment: attachments
+    }, threadID, (err, info) => {
+      if (err) return;
       global.client.handleReply.push({
         name: module.exports.config.name,
         messageID: info.messageID,
-        author: event.senderID,
-        videos: videos.slice(0, limit)
+        author: senderID,
+        videos
       });
-    });
-  } catch (e) {
-    console.error(e);
-    api.sendMessage("❌ Đã xảy ra lỗi khi tìm kiếm video.", event.threadID, event.messageID);
+    }, messageID);
+
+  } catch (err) {
+    console.error(err);
+    api.sendMessage("❌ Đã xảy ra lỗi khi tìm kiếm TikTok.", threadID, messageID);
   }
 };
 
-module.exports.handleReply = async function ({ api, event, handleReply }) {
-  const { author, videos } = handleReply;
-  if (event.senderID !== author)
-    return api.sendMessage("⚠️ Bạn không phải người đã yêu cầu danh sách này.", event.threadID);
+module.exports.handleReply = async ({ api, event, handleReply }) => {
+  const { threadID, messageID, senderID, body } = event;
+  if (senderID !== handleReply.author) return;
 
-  const choice = parseInt(event.body);
-  if (isNaN(choice) || choice < 1 || choice > videos.length)
-    return api.sendMessage(`⚠️ Chỉ được chọn số từ 1 đến ${videos.length}.`, event.threadID);
+  const index = parseInt(body);
+  if (isNaN(index) || index < 1 || index > handleReply.videos.length)
+    return api.sendMessage("⚠️ Số không hợp lệ.", threadID, messageID);
 
-  const video = videos[choice - 1];
+  const video = handleReply.videos[index - 1];
+  api.unsendMessage(handleReply.messageID);
+  api.setMessageReaction("⏳", messageID, () => {}, true);
+
   const downloadUrl = video.play || video.playwm;
-  const fileName = `tiktok_${Date.now()}.mp4`;
-  const filePath = path.join(__dirname, "cache", fileName);
+  const filePath = path.join(__dirname, "cache", `${Date.now()}.mp4`);
 
   try {
-    const response = await axios({
+    const res = await axios({
       url: downloadUrl,
       method: "GET",
       responseType: "stream"
     });
 
     const writer = fs.createWriteStream(filePath);
-    response.data.pipe(writer);
+    res.data.pipe(writer);
 
     writer.on("finish", () => {
       api.sendMessage({
-        body: `🎬 Đây là video bạn chọn:\n📌 ${video.title || "Không có tiêu đề"}`,
+        body: `🎬 ${video.title || "Video đã chọn"}`,
         attachment: fs.createReadStream(filePath)
-      }, event.threadID, () => fs.unlinkSync(filePath), event.messageID);
+      }, threadID, () => {
+        fs.unlinkSync(filePath);
+        api.setMessageReaction("✅", messageID, () => {}, true);
+      });
     });
 
-    writer.on("error", (err) => {
-      console.error(err);
-      api.sendMessage("❌ Lỗi khi tải video.", event.threadID);
+    writer.on("error", () => {
+      api.sendMessage("❌ Lỗi khi tải video.", threadID);
+      api.setMessageReaction("❌", messageID, () => {}, true);
     });
 
     setTimeout(() => {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    }, 60 * 1000);
+    }, 60000);
 
-  } catch (e) {
-    console.error(e);
-    api.sendMessage("❌ Không thể tải video.", event.threadID);
+  } catch (err) {
+    console.error(err);
+    api.sendMessage("❌ Không thể tải video.", threadID, messageID);
+    api.setMessageReaction("❌", messageID, () => {}, true);
   }
 };
 
-function convertDuration(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-                             }
+function formatDuration(sec) {
+  if (!sec || isNaN(sec)) return "Không rõ";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+  }
